@@ -10,7 +10,6 @@ app.use(express.json())
 app.use(cors())
 mongoose.connect("mongodb://127.0.0.1:27017/candidat");
 
-
 app.post("/Frontend/login", (req, res) => {
     const {email, password} = req.body;
     CandidatModel.findOne({email: email})
