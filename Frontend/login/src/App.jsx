@@ -4,9 +4,12 @@ import Signup from './signup'
 import {BrowserRouter, Routes, Route} from 'react-router-dom'
 import Login from './Login'
 import Navbar from './navbar'
-
-
-
+import Footer from './footer'
+import Home from './Home'
+import Why from './why'
+import Team from './team'
+import Service from './service'
+import About from './about'
 function App() {
   
 
@@ -15,7 +18,12 @@ function App() {
   <Routes>
     <Route path='/register' element={<Signup />}></Route>
     <Route path='/login' element={<Login />}></Route>
-    <Route path='/home' element={<Navbar />}></Route>
+    <Route path='/home' element={<Home />}></Route>
+    <Route path='/footer' element={<Footer />}></Route>
+    <Route path='/why' element={<Why />}></Route>
+    <Route path='/team' element={<Team />}></Route>
+    <Route path='/service' element={<Service />}></Route>
+    <Route path='/about' element={<About />}></Route>
 
   </Routes>
   </BrowserRouter>
