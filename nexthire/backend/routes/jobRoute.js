@@ -1,42 +1,42 @@
 const express = require('express');
-const User = require('../models/user'); // Ensure correct path to your User model
-
+const User = require('../models/user'); // Ensure the correct path to your User model
 const router = express.Router();
 
-// Get all jobs from enterprises
+// Get all jobs with the number of applicants
 router.get('/jobs', async(req, res) => {
     try {
-        // Find all users with role "ENTERPRISE" and extract jobsPosted
-        const enterprises = await User.find({ role: "ENTERPRISE" }, { jobsPosted: 1 });
+        // Fetch enterprises with their jobs
+        const enterprises = await User.find({ role: "ENTERPRISE" }, { jobsPosted: 1, enterprise: 1 });
 
-        // Find all candidates to count the number of applicants for each job
+        // Fetch candidates to count applicants
         const candidates = await User.find({ role: "CANDIDATE" }, { applications: 1 });
 
-        // Create a map to count applicants for each job
+        // Create a map to count applicants per job
         const applicantCountMap = new Map();
-        candidates.forEach(candidate => {
-            candidate.applications.forEach(application => {
-                const jobId = application.jobId;
-                if (applicantCountMap.has(jobId)) {
-                    applicantCountMap.set(jobId, applicantCountMap.get(jobId) + 1);
-                } else {
-                    applicantCountMap.set(jobId, 1);
-                }
+        candidates.forEach((candidate) => {
+            candidate.applications.forEach((application) => {
+                const jobId = application.jobId.toString();
+                applicantCountMap.set(jobId, (applicantCountMap.get(jobId) || 0) + 1);
             });
         });
 
-        // Transform the data to return a structured job list with applicant count
-        const jobs = enterprises.flatMap(enterprise =>
-            (enterprise.jobsPosted || []).map(job => ({
-                _id: job.jobId, // Use jobId as _id for compatibility with frontend
-                title: job.title, // Job title
-                applicants: applicantCountMap.get(job.jobId) || 0, // Number of applicants
+        // Transform data
+        const jobs = enterprises.flatMap((enterprise) =>
+            (enterprise.jobsPosted || []).map((job) => ({
+                _id: job.jobId,
+                title: job.title,
+                applicants: applicantCountMap.get(job.jobId.toString()) || 0,
+                status: job.status,
+                createdDate: job.createdDate ? new Date(job.createdDate).toISOString() : "Unknown",
+                enterpriseName: enterprise.enterprise && enterprise.enterprise.name ? enterprise.enterprise.name : "Unknown",
+                industry: enterprise.enterprise && enterprise.enterprise.industry ? enterprise.enterprise.industry : "Unknown",
+                location: enterprise.enterprise && enterprise.enterprise.location ? enterprise.enterprise.location : "Unknown",
             }))
         );
 
-        res.json(jobs); // Return the list of jobs
+        res.json(jobs);
     } catch (err) {
-        res.status(500).json({ message: err.message }); // Handle errors
+        res.status(500).json({ message: err.message });
     }
 });
 

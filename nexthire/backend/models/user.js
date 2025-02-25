@@ -1,71 +1,189 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-// Check if the model is already defined to avoid overwriting it
-const UserSchema = new mongoose.Schema({
-    email: { type: String, required: true, unique: true },
-    role: { type: String, required: true },
-    password: { type: String, required: true },
-    isActive: { type: Boolean, default: true },
-    createdDate: { type: Date, default: Date.now },
-    lastLogin: { type: Date },
+const UserSchema = new Schema({
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    name: {
+        type: String,
+        required: true
+    },
+    role: {
+        type: String,
+        required: true,
+        enum: ['ADMIN', 'ENTERPRISE', 'CANDIDATE']
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    createdDate: {
+        type: Date,
+        default: Date.now
+    },
+    lastLogin: {
+        type: Date
+    },
     permissions: {
-        canManageUsers: Boolean,
-        canControlPermissions: Boolean,
-        canOverseeSystem: Boolean,
+        canManageUsers: {
+            type: Boolean,
+            default: false
+        },
+        canControlPermissions: {
+            type: Boolean,
+            default: false
+        },
+        canOverseeSystem: {
+            type: Boolean,
+            default: false
+        },
     },
     verificationStatus: {
-        status: String,
-        updatedDate: Date,
-        reason: String,
+        status: {
+            type: String,
+            enum: ['PENDING', 'APPROVED', 'REJECTED'],
+            default: 'PENDING'
+        },
+        updatedDate: {
+            type: Date
+        },
+        reason: {
+            type: String
+        },
     },
     enterprise: {
-        name: String,
-        industry: String,
-        location: String,
-        website: String,
-        description: String,
-        employeeCount: Number,
+        name: {
+            type: String
+        },
+        industry: {
+            type: String
+        },
+        location: {
+            type: String
+        },
+        website: {
+            type: String
+        },
+        description: {
+            type: String
+        },
+        employeeCount: {
+            type: Number
+        },
     },
     jobsPosted: [{
-        jobId: String,
-        title: String,
-        status: String,
-        createdDate: Date,
+        jobId: {
+            type: Schema.Types.ObjectId, // Removed ref: 'Job'
+        },
+        title: {
+            type: String
+        },
+        status: {
+            type: String,
+            enum: ['OPEN', 'CLOSED'],
+            default: 'OPEN'
+        },
+        createdDate: {
+            type: Date,
+            default: Date.now
+        },
     }],
     profile: {
-        resume: String,
-        skills: [String],
-        availability: String,
+        resume: {
+            type: String
+        },
+        skills: [{
+            type: String
+        }],
+        availability: {
+            type: String,
+            enum: ['Full-time', 'Part-time', 'Contract', 'Freelance']
+        },
         experience: [{
-            title: String,
-            company: String,
-            duration: String,
-            description: String,
+            title: {
+                type: String
+            },
+            company: {
+                type: String
+            },
+            duration: {
+                type: String
+            },
+            description: {
+                type: String
+            },
         }],
     },
     applications: [{
-        jobId: String,
-        enterpriseId: String,
-        status: String,
-        dateSubmitted: Date,
-        notes: String,
+        jobId: {
+            type: Schema.Types.ObjectId, // Removed ref: 'Job'
+        },
+        enterpriseId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        status: {
+            type: String,
+            enum: ['Pending', 'Approved', 'Rejected'],
+            default: 'Pending'
+        },
+        dateSubmitted: {
+            type: Date,
+            default: Date.now
+        },
+        notes: {
+            type: String
+        },
     }],
     interviews: [{
-        jobId: String,
-        enterpriseId: String,
-        date: Date,
-        status: String,
-        meeting: {
+        jobId: {
+            type: Schema.Types.ObjectId, // Removed ref: 'Job'
+        },
+        enterpriseId: {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        date: {
+            type: Date
+        },
+        status: {
             type: String,
-            link: String,
-            details: String,
+            enum: ['Scheduled', 'Completed', 'Cancelled'],
+            default: 'Scheduled'
+        },
+        meeting: {
+            type: {
+                type: String,
+                enum: ['In-person', 'Virtual', 'TBD']
+            },
+            link: {
+                type: String
+            },
+            details: {
+                type: String
+            },
         },
         feedback: {
-            rating: Number,
-            comments: String,
+            rating: {
+                type: Number,
+                min: 1,
+                max: 5
+            },
+            comments: {
+                type: String
+            },
         },
     }],
+    picture: {
+        type: String
+    },
 });
 
-// Avoid overwriting the model if it's already defined
 module.exports = mongoose.models.User || mongoose.model('User', UserSchema);
